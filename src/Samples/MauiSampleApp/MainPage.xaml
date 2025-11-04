@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiAppUpdater.src.Samples.MauiSampleApp.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="25" Padding="30,0" VerticalOptions="Center">
+
+            <Label 
+                Text="Update Sample"
+                SemanticProperties.HeadingLevel="Level1"
+                FontSize="32"
+                HorizontalOptions="Center" />
+
+            <Button 
+                x:Name="CheckUpdateBtn"
+                Text="Check for Update"
+                SemanticProperties.Hint="Checks for available updates"
+                Clicked="OnCheckUpdateClicked"
+                HorizontalOptions="Center" />
+
+            <Label 
+                x:Name="StatusLabel"
+                Text=""
+                SemanticProperties.Description="Status of the update check"
+                HorizontalOptions="Center" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

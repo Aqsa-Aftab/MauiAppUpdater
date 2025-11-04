@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Only build Android tests locally to avoid iOS code-signing requirements -->
+    <TargetFramework>net9.0-android</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <ApplicationId>com.example.mauisample.tests</ApplicationId>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="2.6.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <ProjectReference Include="..\..\src\MauiAppUpdater\Maui.AppUpdater.csproj" />
+  </ItemGroup>
+
+</Project>
