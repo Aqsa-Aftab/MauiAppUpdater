@@ -15,27 +15,20 @@ namespace MauiAppUpdater
             _options = options;
         }
 
-        public async Task<UpdateInfo> CheckForUpdateAsync()
+        public Task<UpdateInfo> CheckForUpdateAsync()
         {
             if (string.IsNullOrEmpty(_options.AppStoreIdOrUrl))
                 throw new AppUpdateException("App Store ID/URL not configured");
 
-            try
-            {
-                // Note: In actual implementation, this would check iTunes API
-                // This is a mock implementation
-                return new UpdateInfo(
-                    IsUpdateAvailable: true,
-                    LatestVersion: "2.0.0",
-                    Type: _options.ForceUpdate ? UpdateType.Immediate : UpdateType.Flexible,
-                    Priority: 1,
-                    ReleaseNotes: "New version available"
-                );
-            }
-            catch (Exception ex)
-            {
-                throw new AppUpdateException("Failed to check for updates", ex);
-            }
+            // Mock implementation; replace with iTunes API query later.
+            var info = new UpdateInfo(
+                IsUpdateAvailable: true,
+                LatestVersion: "2.0.0",
+                Type: _options.ForceUpdate ? UpdateType.Immediate : UpdateType.Flexible,
+                Priority: 1,
+                ReleaseNotes: "New version available"
+            );
+            return Task.FromResult(info);
         }
 
         public async Task<bool> StartFlexibleUpdateAsync()
@@ -63,13 +56,22 @@ namespace MauiAppUpdater
                 }
 
                 var nsUrl = new NSUrl(urlString);
-                if (UIApplication.SharedApplication.CanOpenUrl(nsUrl))
+                if (!UIApplication.SharedApplication.CanOpenUrl(nsUrl))
+                    return false;
+
+                var tcs = new TaskCompletionSource<bool>();
+                // Modern OpenUrl overload with completion handler (bridged if available).
+                if (UIApplication.SharedApplication.RespondsToSelector(new ObjCRuntime.Selector("openURL:options:completionHandler:")))
                 {
-                    // Synchronous open (iOS API); wrap in Task for API consistency.
-                    UIApplication.SharedApplication.OpenUrl(nsUrl);
-                    return await Task.FromResult(true);
+                    UIApplication.SharedApplication.OpenUrl(nsUrl, new NSDictionary(), (success) =>
+                    {
+                        tcs.TrySetResult(success);
+                    });
+                    return await tcs.Task.ConfigureAwait(false);
                 }
-                return await Task.FromResult(false);
+                // Fallback to deprecated synchronous call.
+                bool opened = UIApplication.SharedApplication.OpenUrl(nsUrl);
+                return opened;
             }
             catch (Exception ex)
             {
@@ -79,15 +81,15 @@ namespace MauiAppUpdater
 
         private UIViewController? GetCurrentController()
         {
-            UIWindow? window = UIApplication.SharedApplication.KeyWindow;
-            UIViewController? rootController = window?.RootViewController;
-            
-            UIViewController? current = rootController;
+            // Multi-scene safe approach.
+            var windowScene = UIApplication.SharedApplication.ConnectedScenes
+                .OfType<UIWindowScene>()
+                .FirstOrDefault();
+            var window = windowScene?.Windows.FirstOrDefault(w => w.IsKeyWindow);
+            var rootController = window?.RootViewController;
+            var current = rootController;
             while (current?.PresentedViewController != null)
-            {
                 current = current.PresentedViewController;
-            }
-            
             return current;
         }
     }

@@ -16,11 +16,11 @@ namespace MauiAppUpdater
             PlatformUtils.ValidateConfiguration(options);
         }
 
-        public async Task<UpdateInfo> CheckForUpdateAsync()
+        public Task<UpdateInfo> CheckForUpdateAsync()
         {
             // Stub implementation: Without Play Core bindings, we can't query update availability.
             // Returns no update. Future enhancement: add proper Play Core package and logic.
-            return await Task.FromResult(new UpdateInfo(false, "", UpdateType.None, 0));
+            return Task.FromResult(new UpdateInfo(false, "", UpdateType.None, 0));
         }
 
         public async Task<bool> StartFlexibleUpdateAsync()

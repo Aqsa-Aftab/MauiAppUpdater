@@ -11,7 +11,7 @@ namespace MauiSampleApp
     {
         private const int UPDATE_REQUEST_CODE = 500;
 
-        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+    protected override void OnActivityResult(int requestCode, Result resultCode, Intent? data)
         {
             if (requestCode == UPDATE_REQUEST_CODE)
             {
