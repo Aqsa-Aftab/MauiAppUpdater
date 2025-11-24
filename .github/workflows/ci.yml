@@ -12,8 +12,8 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build -c Release
-      - name: Test
-        run: dotnet test tests/MauiAppUpdater.Tests -c Release --no-build
+      - name: Test (net9.0 only)
+        run: dotnet test tests/MauiAppUpdater.Tests -c Release --framework net9.0 --no-build
       - name: Pack
         run: dotnet pack src/MauiAppUpdater -c Release -o ./artifacts
       - name: Upload

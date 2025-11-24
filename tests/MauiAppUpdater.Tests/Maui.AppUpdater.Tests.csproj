@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <!-- Only build Android tests locally to avoid iOS code-signing requirements -->
-    <TargetFramework>net9.0-android</TargetFramework>
+  <!-- Multi-target: include plain net9.0 for hostable unit tests (CI), keep android for local validation -->
+  <TargetFrameworks>net9.0;net9.0-android</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <ApplicationId>com.example.mauisample.tests</ApplicationId>
+  <ApplicationId Condition="'$(TargetFramework)'=='net9.0-android'">com.example.mauisample.tests</ApplicationId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="xunit" Version="2.6.1" />

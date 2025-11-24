@@ -10,7 +10,7 @@ namespace MauiSampleApp
             InitializeComponent();
         }
 
-        protected override Window CreateWindow(IActivationState activationState)
+        protected override Window CreateWindow(IActivationState? activationState)
         {
             return new Window(new NavigationPage(_mainPage));
         }

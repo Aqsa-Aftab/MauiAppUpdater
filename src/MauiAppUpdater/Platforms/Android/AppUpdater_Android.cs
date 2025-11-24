@@ -23,19 +23,19 @@ namespace MauiAppUpdater
             return Task.FromResult(new UpdateInfo(false, "", UpdateType.None, 0));
         }
 
-        public async Task<bool> StartFlexibleUpdateAsync()
+        public Task<bool> StartFlexibleUpdateAsync()
         {
             // Without Play Core, fallback: open Play Store page.
-            return await PromptToOpenStoreAsync();
+            return PromptToOpenStoreAsync();
         }
 
-        public async Task<bool> StartImmediateUpdateAsync()
+        public Task<bool> StartImmediateUpdateAsync()
         {
             // Fallback behavior identical to flexible update.
-            return await PromptToOpenStoreAsync();
+            return PromptToOpenStoreAsync();
         }
 
-        public async Task<bool> PromptToOpenStoreAsync()
+        public Task<bool> PromptToOpenStoreAsync()
         {
             if (CurrentActivity == null)
                 throw new AppUpdateException("No activity available");
@@ -45,7 +45,7 @@ namespace MauiAppUpdater
                 var intent = new Intent(Intent.ActionView);
                 intent.SetData(Android.Net.Uri.Parse($"market://details?id={_options.PlayStorePackageName}"));
                 CurrentActivity.StartActivity(intent);
-                return true;
+                return Task.FromResult(true);
             }
             catch (Exception ex)
             {
@@ -56,7 +56,7 @@ namespace MauiAppUpdater
                     webIntent.SetData(Android.Net.Uri.Parse(
                         $"https://play.google.com/store/apps/details?id={_options.PlayStorePackageName}"));
                     CurrentActivity.StartActivity(webIntent);
-                    return true;
+                    return Task.FromResult(true);
                 }
                 catch
                 {

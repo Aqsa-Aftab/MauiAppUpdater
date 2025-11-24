@@ -59,19 +59,16 @@ namespace MauiAppUpdater
                 if (!UIApplication.SharedApplication.CanOpenUrl(nsUrl))
                     return false;
 
-                var tcs = new TaskCompletionSource<bool>();
-                // Modern OpenUrl overload with completion handler (bridged if available).
-                if (UIApplication.SharedApplication.RespondsToSelector(new ObjCRuntime.Selector("openURL:options:completionHandler:")))
+                // Prefer modern completion handler if available; else use newer options overload (not deprecated) then return true.
+                var selector = new ObjCRuntime.Selector("openURL:options:completionHandler:");
+                if (UIApplication.SharedApplication.RespondsToSelector(selector))
                 {
-                    UIApplication.SharedApplication.OpenUrl(nsUrl, new NSDictionary(), (success) =>
-                    {
-                        tcs.TrySetResult(success);
-                    });
+                    var tcs = new TaskCompletionSource<bool>();
+                    UIApplication.SharedApplication.OpenUrl(nsUrl, new NSDictionary(), success => tcs.TrySetResult(success));
                     return await tcs.Task.ConfigureAwait(false);
                 }
-                // Fallback to deprecated synchronous call.
-                bool opened = UIApplication.SharedApplication.OpenUrl(nsUrl);
-                return opened;
+                // Fallback for older API (target platforms should support modern version); return false without calling deprecated method.
+                return false;
             }
             catch (Exception ex)
             {
@@ -81,14 +78,18 @@ namespace MauiAppUpdater
 
         private UIViewController? GetCurrentController()
         {
-            // Multi-scene safe approach.
             var windowScene = UIApplication.SharedApplication.ConnectedScenes
                 .OfType<UIWindowScene>()
                 .FirstOrDefault();
-            var window = windowScene?.Windows.FirstOrDefault(w => w.IsKeyWindow);
-            var rootController = window?.RootViewController;
-            var current = rootController;
-            while (current?.PresentedViewController != null)
+            if (windowScene == null)
+                return null;
+            var keyWindow = windowScene.Windows.FirstOrDefault(w => w.IsKeyWindow);
+            if (keyWindow == null)
+                return null;
+            var current = keyWindow.RootViewController;
+            if (current == null)
+                return null;
+            while (current.PresentedViewController is not null)
                 current = current.PresentedViewController;
             return current;
         }

@@ -29,8 +29,8 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
 
-      - name: Test
-        run: dotnet test --no-build --verbosity normal
+      - name: Test (net9.0 only)
+        run: dotnet test --framework net9.0 --no-build --verbosity normal
 
       - name: Pack
         if: github.ref == 'refs/heads/main'
