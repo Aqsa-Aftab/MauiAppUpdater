@@ -62,12 +62,14 @@ namespace MauiAppUpdater
                     urlString = $"itms-apps://apps.apple.com/app/id{urlString}";
                 }
 
-                if (await UIApplication.SharedApplication.CanOpenUrlAsync(new NSUrl(urlString)))
+                var nsUrl = new NSUrl(urlString);
+                if (UIApplication.SharedApplication.CanOpenUrl(nsUrl))
                 {
-                    await UIApplication.SharedApplication.OpenUrlAsync(new NSUrl(urlString), new UIApplicationOpenUrlOptions());
-                    return true;
+                    // Synchronous open (iOS API); wrap in Task for API consistency.
+                    UIApplication.SharedApplication.OpenUrl(nsUrl);
+                    return await Task.FromResult(true);
                 }
-                return false;
+                return await Task.FromResult(false);
             }
             catch (Exception ex)
             {

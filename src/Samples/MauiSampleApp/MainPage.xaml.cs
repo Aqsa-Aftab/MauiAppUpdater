@@ -1,3 +1,5 @@
+using MauiAppUpdater;
+
 namespace MauiSampleApp
 {
     public partial class MainPage : ContentPage

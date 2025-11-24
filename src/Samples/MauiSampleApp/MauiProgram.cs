@@ -1,3 +1,5 @@
+using MauiAppUpdater;
+
 namespace MauiSampleApp
 {
     public static class MauiProgram
@@ -13,7 +15,7 @@ namespace MauiSampleApp
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            builder.Services.AddMauiAppUpdater(options =>
+            builder.AddMauiAppUpdater(options =>
             {
                 #if __ANDROID__
                 options.PlayStorePackageName = "com.example.mauisample";

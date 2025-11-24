@@ -26,7 +26,6 @@
     <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.0" />
     
     <!-- Android-specific dependencies -->
-    <PackageReference Include="Com.Android.Support.InstallReferrer" Version="2.2.0" Condition="$(TargetFramework.Contains('-android'))" />
     <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.7.0.3" Condition="$(TargetFramework.Contains('-android'))" />
   </ItemGroup>
 </Project>

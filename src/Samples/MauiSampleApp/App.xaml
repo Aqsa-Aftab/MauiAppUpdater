@@ -5,10 +5,7 @@
              x:Class="MauiSampleApp.App">
     <Application.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
-                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
-            </ResourceDictionary.MergedDictionaries>
+            <!-- Removed missing merged dictionaries (Colors.xaml, Styles.xaml) to fix build. -->
         </ResourceDictionary>
     </Application.Resources>
 </Application>

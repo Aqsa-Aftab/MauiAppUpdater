@@ -1,3 +1,5 @@
+using MauiAppUpdater;
+
 namespace MauiSampleApp
 {
     public class MockAppUpdater : IAppUpdater

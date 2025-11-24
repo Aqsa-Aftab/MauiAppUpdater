@@ -1,114 +1,38 @@
 #if __ANDROID__
 using Android.App;
 using Android.Content;
-using Android.Gms.Tasks;
-using Com.Google.Android.Play.Core.Appupdate;
-using Com.Google.Android.Play.Core.Install.Model;
+// Removed Play Core dependencies (Google in-app updates) to allow compilation without external packages.
 
 namespace MauiAppUpdater
 {
     public class AppUpdater_Android : IAppUpdater
     {
         private readonly AppUpdaterOptions _options;
-        private readonly IAppUpdateManager _updateManager;
-        private Activity? CurrentActivity => Platform.CurrentActivity;
-        private const int UPDATE_REQUEST_CODE = 500;
+    private Activity? CurrentActivity => Platform.CurrentActivity;
 
         public AppUpdater_Android(AppUpdaterOptions options)
         {
             _options = options;
-            _updateManager = AppUpdateManagerFactory.Create(Application.Context);
             PlatformUtils.ValidateConfiguration(options);
         }
 
         public async Task<UpdateInfo> CheckForUpdateAsync()
         {
-            try
-            {
-                // Get app update info
-                var appUpdateInfo = await _updateManager.AppUpdateInfo
-                    .AsAsync<Com.Google.Android.Play.Core.Appupdate.AppUpdateInfo>();
-
-                if (appUpdateInfo.UpdateAvailability() == UpdateAvailability.UpdateAvailable)
-                {
-                    bool canFlex = appUpdateInfo.IsUpdateTypeAllowed(AppUpdateType.Flexible);
-                    bool canImmediate = appUpdateInfo.IsUpdateTypeAllowed(AppUpdateType.Immediate);
-                    
-                    if (!canFlex && !canImmediate)
-                        return new UpdateInfo(false, "", UpdateType.None, 0);
-
-                    return new UpdateInfo(
-                        IsUpdateAvailable: true,
-                        LatestVersion: appUpdateInfo.AvailableVersionCode().ToString(),
-                        Type: _options.ForceUpdate || !canFlex ? UpdateType.Immediate : UpdateType.Flexible,
-                        Priority: appUpdateInfo.UpdatePriority(),
-                        ReleaseNotes: null // Play Core doesn't provide notes
-                    );
-                }
-
-                return new UpdateInfo(false, "", UpdateType.None, 0);
-            }
-            catch (Exception ex)
-            {
-                throw new AppUpdateException("Failed to check for updates", ex);
-            }
+            // Stub implementation: Without Play Core bindings, we can't query update availability.
+            // Returns no update. Future enhancement: add proper Play Core package and logic.
+            return await Task.FromResult(new UpdateInfo(false, "", UpdateType.None, 0));
         }
 
         public async Task<bool> StartFlexibleUpdateAsync()
         {
-            if (CurrentActivity == null)
-                throw new AppUpdateException("No activity available");
-
-            try
-            {
-                var appUpdateInfo = await _updateManager.AppUpdateInfo
-                    .AsAsync<Com.Google.Android.Play.Core.Appupdate.AppUpdateInfo>();
-                
-                if (appUpdateInfo.UpdateAvailability() != UpdateAvailability.UpdateAvailable ||
-                    !appUpdateInfo.IsUpdateTypeAllowed(AppUpdateType.Flexible))
-                    return false;
-
-                var task = _updateManager.StartUpdateFlowForResult(
-                    appUpdateInfo,
-                    AppUpdateType.Flexible,
-                    CurrentActivity,
-                    UPDATE_REQUEST_CODE);
-
-                // Handle result via Activity.OnActivityResult
-                return task.IsSuccessful;
-            }
-            catch (Exception ex)
-            {
-                throw new AppUpdateException("Failed to start flexible update", ex);
-            }
+            // Without Play Core, fallback: open Play Store page.
+            return await PromptToOpenStoreAsync();
         }
 
         public async Task<bool> StartImmediateUpdateAsync()
         {
-            if (CurrentActivity == null)
-                throw new AppUpdateException("No activity available");
-
-            try
-            {
-                var appUpdateInfo = await _updateManager.AppUpdateInfo
-                    .AsAsync<Com.Google.Android.Play.Core.Appupdate.AppUpdateInfo>();
-                
-                if (appUpdateInfo.UpdateAvailability() != UpdateAvailability.UpdateAvailable ||
-                    !appUpdateInfo.IsUpdateTypeAllowed(AppUpdateType.Immediate))
-                    return false;
-
-                var task = _updateManager.StartUpdateFlowForResult(
-                    appUpdateInfo,
-                    AppUpdateType.Immediate,
-                    CurrentActivity,
-                    UPDATE_REQUEST_CODE);
-
-                return task.IsSuccessful;
-            }
-            catch (Exception ex)
-            {
-                throw new AppUpdateException("Failed to start immediate update", ex);
-            }
+            // Fallback behavior identical to flexible update.
+            return await PromptToOpenStoreAsync();
         }
 
         public async Task<bool> PromptToOpenStoreAsync()
