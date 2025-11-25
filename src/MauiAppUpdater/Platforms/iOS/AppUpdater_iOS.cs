@@ -2,17 +2,20 @@
 using Foundation;
 using UIKit;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace MauiAppUpdater
 {
     public class AppUpdater_iOS : IAppUpdater
     {
         private readonly AppUpdaterOptions _options;
+    private readonly ILogger? _logger;
         private UIViewController? CurrentController => GetCurrentController();
 
-        public AppUpdater_iOS(AppUpdaterOptions options)
+    public AppUpdater_iOS(AppUpdaterOptions options, ILogger? logger = null)
         {
             _options = options;
+            _logger = logger;
         }
 
         public Task<UpdateInfo> CheckForUpdateAsync()
@@ -49,13 +52,9 @@ namespace MauiAppUpdater
 
             try
             {
-                string urlString = _options.AppStoreIdOrUrl;
-                if (!urlString.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                {
-                    urlString = $"itms-apps://apps.apple.com/app/id{urlString}";
-                }
-
-                var nsUrl = new NSUrl(urlString);
+                var idOrUrl = _options.AppStoreIdOrUrl ?? throw new AppUpdateException("App Store ID/URL not configured");
+                var safeUrl = PlatformUtils.BuildSafeAppleStoreUrl(idOrUrl);
+                var nsUrl = new NSUrl(safeUrl);
                 if (!UIApplication.SharedApplication.CanOpenUrl(nsUrl))
                     return false;
 
@@ -64,6 +63,7 @@ namespace MauiAppUpdater
                 if (UIApplication.SharedApplication.RespondsToSelector(selector))
                 {
                     var tcs = new TaskCompletionSource<bool>();
+                    _logger?.LogInformation("Opening App Store URL {Url}", safeUrl);
                     UIApplication.SharedApplication.OpenUrl(nsUrl, new NSDictionary(), success => tcs.TrySetResult(success));
                     return await tcs.Task.ConfigureAwait(false);
                 }

@@ -1,23 +1,52 @@
 name: CI
 on: [push, pull_request]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+      
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with: dotnet-version: '8.0.x'
+        uses: actions/setup-dotnet@v4
+        with: 
+          dotnet-version: '9.0.x'
+      
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json', '**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+      
+      - name: Install MAUI Workload
+        run: |
+          dotnet workload install maui --ignore-failed-sources
+          dotnet workload list
+      
       - name: Restore
         run: dotnet restore
+      
       - name: Build
-        run: dotnet build -c Release
+        run: dotnet build -c Release --no-restore
+      
       - name: Test (net9.0 only)
-        run: dotnet test tests/MauiAppUpdater.Tests -c Release --framework net9.0 --no-build
+        run: dotnet test tests/MauiAppUpdater.Tests/Maui.AppUpdater.Tests.csproj -c Release --framework net9.0 --no-build
+      
       - name: Pack
-        run: dotnet pack src/MauiAppUpdater -c Release -o ./artifacts
+        run: dotnet pack src/MauiAppUpdater/Maui.AppUpdater.csproj -c Release --no-build -o ./artifacts
+      
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: mauiupdater-artifacts
           path: ./artifacts/*.nupkg
+          retention-days: 7

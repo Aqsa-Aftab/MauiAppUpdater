@@ -3,7 +3,7 @@ namespace MauiAppUpdater
     /// <summary>
     /// Extension methods for platform-specific utilities
     /// </summary>
-    internal static class PlatformUtils
+    public static class PlatformUtils
     {
         /// <summary>
         /// Parses version strings into comparable Version objects
@@ -51,6 +51,33 @@ namespace MauiAppUpdater
             if (!AppUpdaterValidator.IsValidAppleIdOrUrl(options.AppStoreIdOrUrl))
                 throw new AppUpdateException("Invalid App Store ID/URL format");
             #endif
+        }
+
+        /// <summary>
+        /// Builds a safe App Store URL using the itms-apps scheme from either a numeric ID or a full apps.apple.com URL.
+        /// </summary>
+        public static string BuildSafeAppleStoreUrl(string idOrUrl)
+        {
+            if (string.IsNullOrWhiteSpace(idOrUrl))
+                throw new AppUpdateException("App Store ID/URL not configured");
+
+            string? id = null;
+            // Numeric ID
+            if (long.TryParse(idOrUrl, out _))
+            {
+                id = idOrUrl;
+            }
+            else
+            {
+                var m = System.Text.RegularExpressions.Regex.Match(idOrUrl, @"^https://apps\.apple\.com/.*/id(\d+)");
+                if (m.Success)
+                    id = m.Groups[1].Value;
+            }
+
+            if (string.IsNullOrEmpty(id))
+                throw new AppUpdateException("Invalid App Store ID/URL format");
+
+            return $"itms-apps://apps.apple.com/app/id{id}";
         }
     }
 }

@@ -1,0 +1,46 @@
+root = true
+
+# Global editor defaults
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.{cs,csx}]
+# C# style rules
+csharp_new_line_before_open_brace = all
+csharp_prefer_braces = true:suggestion
+csharp_prefer_simple_using_statement = true:suggestion
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+
+# Nullable-related guidance
+# Encourage explicit null checks and pattern matching
+csharp_style_conditional_delegate_call = true:warning
+
+# Analyzer severities (general)
+dotnet_analyzer_diagnostic.severity = warning
+
+# Prefer using modern APIs
+dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
+
+# Naming conventions
+dotnet_naming_rule.private_members_underscore.severity = suggestion
+dotnet_naming_rule.private_members_underscore.symbols = private_fields
+dotnet_naming_rule.private_members_underscore.style = prefix_underscore
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+dotnet_naming_style.prefix_underscore.required_prefix = _
+
+# Make core library stricter
+[src/MauiAppUpdater/**/*.cs]
+# Raise analyzer diagnostics to warnings (already default above) and treat suggestions as warnings
+# This helps keep the core lib tidy without breaking builds in other projects.
+dotnet_analyzer_diagnostic.category-Style.severity = warning
