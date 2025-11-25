@@ -26,15 +26,15 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build
-        run: dotnet build --no-restore
+      - name: Build (Release)
+        run: dotnet build -c Release --no-restore
 
       - name: Test (net9.0 only)
         run: dotnet test --framework net9.0 --no-build --verbosity normal
 
-      - name: Pack
+      - name: Pack library
         if: github.ref == 'refs/heads/main'
-        run: dotnet pack --configuration Release --no-build --output ./artifacts
+        run: dotnet pack src/MauiAppUpdater/Maui.AppUpdater.csproj -c Release --no-build -o ./artifacts
 
       - name: Upload artifact
         if: github.ref == 'refs/heads/main'
