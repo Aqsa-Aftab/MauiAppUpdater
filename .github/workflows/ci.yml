@@ -21,10 +21,15 @@ jobs:
       
       - name: Setup .NET MAUI
         run: |
+          echo "Clearing NuGet cache..."
           dotnet nuget locals all --clear
-          dotnet workload install maui --source https://api.nuget.org/v3/index.json
-          dotnet workload install android --source https://api.nuget.org/v3/index.json
-          dotnet workload install ios --source https://api.nuget.org/v3/index.json
+          echo "Installing MAUI workload..."
+          dotnet workload install maui --source https://api.nuget.org/v3/index.json --verbosity detailed || exit 1
+          echo "Installing Android workload..."
+          dotnet workload install android --source https://api.nuget.org/v3/index.json --verbosity detailed || exit 1
+          echo "Installing iOS workload..."
+          dotnet workload install ios --source https://api.nuget.org/v3/index.json --verbosity detailed || exit 1
+          echo "All workloads installed successfully"
       
       - name: Cache NuGet
         uses: actions/cache@v4
