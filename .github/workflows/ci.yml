@@ -31,6 +31,9 @@ jobs:
         run: |
           dotnet workload install maui --ignore-failed-sources
           dotnet workload list
+
+      - name: Workload restore
+        run: dotnet workload restore
       
       - name: Restore
         run: dotnet restore
